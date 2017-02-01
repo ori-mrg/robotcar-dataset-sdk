@@ -2,11 +2,17 @@ Robotcar Dataset SDK
 ====================
 This repo contains sample MATLAB code for viewing and manipulating data from the [Oxford Robotcar Dataset](http://robotcar-dataset.robots.ox.ac.uk).
 
+Cloning
+-------
+To clone this repository, you will need [git-lfs](https://git-lfs.github.com/).
+
 Directories
 -----------
 `extrinsics`: Extrinsic calibrations between the sensors on the vehicle
 
 `matlab`: Sample matlab code for viewing and manipulating data
+
+`models`: Camera models. See the sample python or matlab code for how to use these
 
 `python`: Sample python code for viewing and manipulating data
 
