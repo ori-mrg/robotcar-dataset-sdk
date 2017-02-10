@@ -16,6 +16,7 @@ import re
 import os
 import numpy as np
 import scipy.interpolate as interp
+from scipy.ndimage import map_coordinates
 
 
 class CameraModel:
@@ -99,17 +100,13 @@ class CameraModel:
         if image.shape[0] * image.shape[1] != self.bilinear_lut.shape[0]:
             raise ValueError('Incorrect image size for camera model')
 
-        undistorted = np.zeros(image.shape)
-
-        x = np.arange(0, image.shape[0])
-        y = np.arange(0, image.shape[1])
+        lut = self.bilinear_lut[:, 1::-1].T.reshape((2, image.shape[0], image.shape[1]))
 
         if len(image.shape) == 1:
             raise ValueError('Undistortion function only works with multi-channel images')
 
-        for channel in range(0, image.shape[2]):
-            undistorted[:, :, channel] = interp.interpn((x, y), image[:, :, channel],
-                                                        self.bilinear_lut[:, 1::-1]).reshape(image.shape[0:2])
+        undistorted = np.rollaxis(np.array([map_coordinates(image[:, :, channel], lut, order=1)
+                                for channel in range(0, image.shape[2])]), 0, 3)
 
         return undistorted.astype(image.dtype)
 
