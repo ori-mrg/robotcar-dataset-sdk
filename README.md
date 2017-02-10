@@ -6,6 +6,8 @@ Cloning
 -------
 To clone this repository, you will need [git-lfs](https://git-lfs.github.com/).
 
+*Note:* if you download a source code-only archive from the releases page, you will not get the camera models, which are stored in git-lfs.
+
 Directories
 -----------
 `extrinsics`: Extrinsic calibrations between the sensors on the vehicle
