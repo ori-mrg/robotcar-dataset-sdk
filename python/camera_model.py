@@ -144,6 +144,6 @@ class CameraModel:
         lut_path = os.path.join(models_dir, model_name + '_distortion_lut.bin')
 
         lut = np.fromfile(lut_path, np.double)
-        lut = lut.reshape([2, lut.size / 2])
+        lut = lut.reshape([2, lut.size // 2])
         self.bilinear_lut = lut.transpose()
 
