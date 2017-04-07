@@ -137,7 +137,7 @@ def so3_to_quaternion(so3):
     y = sqrt(1 + R_yy - R_xx - R_zz) / 2
     z = sqrt(1 + R_zz - R_yy - R_xx) / 2
 
-    max_index = max(xrange(4), key=[w, x, y, z].__getitem__)
+    max_index = max(range(4), key=[w, x, y, z].__getitem__)
 
     if max_index == 0:
         x = (R_zy - R_yz) / (4 * w)

@@ -74,7 +74,7 @@ uv, depth = model.project(pointcloud, image.shape)
 
 plt.imshow(image)
 plt.hold(True)
-plt.scatter(uv[0, :], uv[1, :], s=2, c=depth, edgecolors='none', cmap='jet')
+plt.scatter(np.ravel(uv[0, :]), np.ravel(uv[1, :]), s=2, c=depth, edgecolors='none', cmap='jet')
 plt.xlim(0, image.shape[1])
 plt.ylim(image.shape[0], 0)
 plt.xticks([])

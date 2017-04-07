@@ -88,7 +88,7 @@ def build_pointcloud(lidar_dir, poses_file, extrinsics_dir, start_time, end_time
         scan = np.fromfile(scan_file, np.double)
         scan_file.close()
 
-        scan = scan.reshape((len(scan) / 3, 3)).transpose()
+        scan = scan.reshape((len(scan) // 3, 3)).transpose()
 
         if lidar != 'ldmrs':
             # LMS scans are tuples of (x, y, reflectance)
