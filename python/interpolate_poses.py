@@ -85,7 +85,7 @@ def interpolate_ins_poses(ins_path, pose_timestamps, origin_timestamp):
             timestamp = int(row[0])
             ins_timestamps.append(timestamp)
 
-            xyzrpy = [float(v) for v in row[2:8]]
+            xyzrpy = [float(v) for v in row[5:8]] + [float(v) for v in row[-3:]]
             abs_pose = build_se3_transform(xyzrpy)
             abs_poses.append(abs_pose)
 
