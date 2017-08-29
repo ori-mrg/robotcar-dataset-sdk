@@ -1,0 +1,5 @@
+numpy
+matplotlib
+colour_demosaicing
+pillow
+
