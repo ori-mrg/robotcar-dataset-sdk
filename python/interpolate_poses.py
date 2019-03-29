@@ -137,7 +137,7 @@ def interpolate_poses(pose_timestamps, abs_poses, requested_timestamps, origin_t
     if max(upper_indices) >= len(pose_timestamps):
         upper_indices = [min(i, len(pose_timestamps) - 1) for i in upper_indices]
 
-    fractions = (requested_timestamps - pose_timestamps[lower_indices]) / \
+    fractions = (requested_timestamps - pose_timestamps[lower_indices]) // \
                 (pose_timestamps[upper_indices] - pose_timestamps[lower_indices])
 
     quaternions_lower = abs_quaternions[:, lower_indices]
