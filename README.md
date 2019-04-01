@@ -23,4 +23,4 @@ time window for all sensors.
 It is recommended that you extract all tar files to the same directory - this will leave all the data in a sensible
 heirarchical directory structure.
 
-An example script for scraping the dataset website can be found at (https://github.com/matthewgadd/RobotCarDataset-Scraper).
+An example script for scraping the dataset website can be found at [RobotCarDataset-Scraper](https://github.com/mttgdd/RobotCarDataset-Scraper).
