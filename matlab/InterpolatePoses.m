@@ -1,4 +1,4 @@
-function [poses] = InterpolatePoses(ins_file, pose_timestamps, origin_timestamp)
+function [poses] = InterpolatePoses(ins_file, pose_timestamps, origin_timestamp, use_rtk)
   
 % InterpolatePoses - interpolate INS poses to find poses at given timestamps
 %
@@ -31,9 +31,18 @@ function [poses] = InterpolatePoses(ins_file, pose_timestamps, origin_timestamp)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
   ins_file_id = fopen(ins_file);
-  headers = textscan(ins_file_id, '%s', 15, 'Delimiter',',');
+  if ~use_rtk
+      header_count = 15;
+  else
+      header_count = 23;
+  headers = textscan(ins_file_id, '%s', header_count, 'Delimiter',',');
+  if ~use_rtk
+      format_str = '%u64 %s %f %f %f %f %f %f %s %f %f %f %f %f %f';
+  else
+      format_str = '%u64 %f %f %f %f %f %f %s %f %f %f %f %f %f %f %f %f %f %f %f %f %f %f';
+  end
   ins_data = textscan(ins_file_id, ...
-      '%u64 %s %f %f %f %f %f %f %s %f %f %f %f %f %f','Delimiter',',');
+      format_str,'Delimiter',',');
   fclose(ins_file_id);
   
   ins_timestamps = ins_data{1};
@@ -48,12 +57,27 @@ function [poses] = InterpolatePoses(ins_file, pose_timestamps, origin_timestamp)
   ins_poses = cell(1, upper_index - lower_index + 1);
   ins_quaternions = cell(1, upper_index - lower_index + 1);
   
-  northings = ins_data{6};
-  eastings = ins_data{7};
-  downs = ins_data{8};
-  rolls = ins_data{13};
-  pitches = ins_data{14};
-  yaws = ins_data{15};
+  if ~use_rtk
+    northing_col = 6;
+    easting_col = 7;
+    down_col = 8;
+    roll_col = 13;
+    pitch_col = 14;
+    yaw_col = 15;
+  else
+    northing_col = 5;
+    easting_col = 6;
+    down_col = 7;
+    roll_col = 12;
+    pitch_col = 13;
+    yaw_col = 14;
+  end
+  northings = ins_data{northing_col};
+  eastings = ins_data{easting_col};
+  downs = ins_data{down_col};
+  rolls = ins_data{roll_col};
+  pitches = ins_data{pitch_col};
+  yaws = ins_data{yaw_col};
   
   pose_timestamps = [origin_timestamp pose_timestamps];
   
