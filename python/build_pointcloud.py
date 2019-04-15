@@ -60,15 +60,15 @@ def build_pointcloud(lidar_dir, poses_file, extrinsics_dir, start_time, end_time
         extrinsics = next(extrinsics_file)
     G_posesource_laser = build_se3_transform([float(x) for x in extrinsics.split(' ')])
 
-    poses_type = re.search('(vo|ins)\.csv', poses_file).group(1)
+    poses_type = re.search('(vo|ins|rtk)\.csv', poses_file).group(1)
 
-    if poses_type == 'ins':
+    if poses_type in ['ins', 'rtk']:
         with open(os.path.join(extrinsics_dir, 'ins.txt')) as extrinsics_file:
             extrinsics = next(extrinsics_file)
             G_posesource_laser = np.linalg.solve(build_se3_transform([float(x) for x in extrinsics.split(' ')]),
                                                  G_posesource_laser)
 
-        poses = interpolate_ins_poses(poses_file, timestamps, origin_time)
+        poses = interpolate_ins_poses(poses_file, timestamps, origin_time, use_rtk=(poses_type == 'rtk'))
     else:
         # sensor is VO, which is located at the main vehicle frame
         poses = interpolate_vo_poses(poses_file, timestamps, origin_time)

@@ -60,7 +60,7 @@ def interpolate_vo_poses(vo_path, pose_timestamps, origin_timestamp):
     return interpolate_poses(vo_timestamps, abs_poses, pose_timestamps, origin_timestamp)
 
 
-def interpolate_ins_poses(ins_path, pose_timestamps, origin_timestamp):
+def interpolate_ins_poses(ins_path, pose_timestamps, origin_timestamp, use_rtk=False):
     """Interpolate poses from INS.
 
     Args:
@@ -85,7 +85,8 @@ def interpolate_ins_poses(ins_path, pose_timestamps, origin_timestamp):
             timestamp = int(row[0])
             ins_timestamps.append(timestamp)
 
-            xyzrpy = [float(v) for v in row[5:8]] + [float(v) for v in row[-3:]]
+            utm = row[5:8] if not use_rtk else row[4:7]
+            xyzrpy = [float(v) for v in utm] + [float(v) for v in row[-3:]]
             abs_pose = build_se3_transform(xyzrpy)
             abs_poses.append(abs_pose)
 
