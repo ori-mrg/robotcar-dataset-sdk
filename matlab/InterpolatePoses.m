@@ -35,6 +35,7 @@ function [poses] = InterpolatePoses(ins_file, pose_timestamps, origin_timestamp,
       header_count = 15;
   else
       header_count = 23;
+  end
   headers = textscan(ins_file_id, '%s', header_count, 'Delimiter',',');
   if ~use_rtk
       format_str = '%u64 %s %f %f %f %f %f %f %s %f %f %f %f %f %f';
