@@ -95,7 +95,7 @@ function ProjectLaserIntoCamera(image_dir, laser_dir, ins_file, models_dir, extr
     G_camera_ins = SE3MatrixFromComponents(camera_extrinsics) * ...
       SE3MatrixFromComponents(ins_extrinsics);
   else
-    G_camera_ins = eye(4);
+    G_camera_ins = SE3MatrixFromComponents(camera_extrinsics);
   end
   
   [fx, fy, cx, cy, G_camera_image, LUT] = ...
