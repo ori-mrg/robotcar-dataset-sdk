@@ -15,9 +15,10 @@
 import os
 import re
 import numpy as np
-from transform import build_se3_transform
 
+from transform import build_se3_transform
 from interpolate_poses import interpolate_vo_poses, interpolate_ins_poses
+from velodyne import load_velodyne_raw, load_velodyne_pointcloud, velodyne_ranges_intensities_angles_to_pointcloud
 
 
 def build_pointcloud(lidar_dir, poses_file, extrinsics_dir, start_time, end_time, origin_time=-1):
@@ -43,7 +44,7 @@ def build_pointcloud(lidar_dir, poses_file, extrinsics_dir, start_time, end_time
     if origin_time < 0:
         origin_time = start_time
 
-    lidar = re.search('(lms_front|lms_rear|ldmrs)', lidar_dir).group(0)
+    lidar = re.search('(lms_front|lms_rear|ldmrs|velodyne_left|velodyne_right)', lidar_dir).group(0)
     timestamps_path = os.path.join(lidar_dir, os.pardir, lidar + '.timestamps')
 
     timestamps = []
@@ -80,20 +81,33 @@ def build_pointcloud(lidar_dir, poses_file, extrinsics_dir, start_time, end_time
         reflectance = np.empty((0))
 
     for i in range(0, len(poses)):
-        scan_path = os.path.join(lidar_dir, str(timestamps[i]) + '.bin')
-        if not os.path.isfile(scan_path):
-            continue
+        scan_path = os.path.join(lidar_dir, str(timestamps[i]) + '.bina')
+        if "velodyne" not in lidar:
+            if not os.path.isfile(scan_path):
+                continue
 
-        scan_file = open(scan_path)
-        scan = np.fromfile(scan_file, np.double)
-        scan_file.close()
+            scan_file = open(scan_path)
+            scan = np.fromfile(scan_file, np.double)
+            scan_file.close()
 
-        scan = scan.reshape((len(scan) // 3, 3)).transpose()
+            scan = scan.reshape((len(scan) // 3, 3)).transpose()
 
-        if lidar != 'ldmrs':
-            # LMS scans are tuples of (x, y, reflectance)
-            reflectance = np.concatenate((reflectance, np.ravel(scan[2, :])))
-            scan[2, :] = np.zeros((1, scan.shape[1]))
+            if lidar != 'ldmrs':
+                # LMS scans are tuples of (x, y, reflectance)
+                reflectance = np.concatenate((reflectance, np.ravel(scan[2, :])))
+                scan[2, :] = np.zeros((1, scan.shape[1]))
+        else:
+            if os.path.isfile(scan_path):
+                ptcld = load_velodyne_pointcloud(scan_path)
+            else:
+                scan_path = os.path.join(lidar_dir, str(timestamps[i]) + '.png')
+                if not os.path.isfile(scan_path):
+                    continue
+                ranges, intensities, angles, approximate_timestamps = load_velodyne_raw(scan_path)
+                ptcld = velodyne_ranges_intensities_angles_to_pointcloud(ranges, intensities, angles)
+
+            reflectance = np.concatenate((reflectance, ptcld[3]))
+            scan = ptcld[:3]
 
         scan = np.dot(np.dot(poses[i], G_posesource_laser), np.vstack([scan, np.ones((1, scan.shape[1]))]))
         pointcloud = np.hstack([pointcloud, scan])
@@ -107,8 +121,7 @@ def build_pointcloud(lidar_dir, poses_file, extrinsics_dir, start_time, end_time
 
 if __name__ == "__main__":
     import argparse
-    import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
+    import open3d
 
     parser = argparse.ArgumentParser(description='Build and display a pointcloud')
     parser.add_argument('--poses_file', type=str, default=None, help='File containing relative or absolute poses')
@@ -118,7 +131,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    lidar = re.search('(lms_front|lms_rear|ldmrs)', args.laser_dir).group(0)
+    lidar = re.search('(lms_front|lms_rear|ldmrs|velodyne_left|velodyne_right)', args.laser_dir).group(0)
     timestamps_path = os.path.join(args.laser_dir, os.pardir, lidar + '.timestamps')
     with open(timestamps_path) as timestamps_file:
         start_time = int(next(timestamps_file).split(' ')[0])
@@ -134,30 +147,19 @@ if __name__ == "__main__":
     else:
         colours = 'gray'
 
-    x = np.ravel(pointcloud[0, :])
-    y = np.ravel(pointcloud[1, :])
-    z = np.ravel(pointcloud[2, :])
-
-    xmin = x.min()
-    ymin = y.min()
-    zmin = z.min()
-    xmax = x.max()
-    ymax = y.max()
-    zmax = z.max()
-    xmid = (xmax + xmin) * 0.5
-    ymid = (ymax + ymin) * 0.5
-    zmid = (zmax + zmin) * 0.5
-
-    max_range = max(xmax - xmin, ymax - ymin, zmax - zmin)
-    x_range = [xmid - 0.5 * max_range, xmid + 0.5 * max_range]
-    y_range = [ymid - 0.5 * max_range, ymid + 0.5 * max_range]
-    z_range = [zmid - 0.5 * max_range, zmid + 0.5 * max_range]
-
-    fig = plt.figure()
-    ax = fig.gca(projection='3d')
-    ax.set_aspect('equal')
-    ax.scatter(-y, -x, -z, marker=',', s=1, c=colours, cmap='gray', edgecolors='none')
-    ax.set_xlim(-y_range[1], -y_range[0])
-    ax.set_ylim(-x_range[1], -x_range[0])
-    ax.set_zlim(-z_range[1], -z_range[0])
-    plt.show()
+    vis = open3d.Visualizer()
+    vis.create_window(window_name=os.path.basename(__file__))
+    pcd = open3d.geometry.PointCloud()
+    pcd.points = open3d.utility.Vector3dVector(np.ascontiguousarray(pointcloud[[1, 0, 2]].transpose().astype(np.float64)) * [[-1., -1, 1]])
+    pcd.colors = open3d.utility.Vector3dVector(np.tile(colours[:, np.newaxis], (1, 3)).astype(np.float64))
+    vis.add_geometry(pcd)
+    render_option = vis.get_render_option()
+    render_option.background_color = np.array([0.1529, 0.1569, 0.1333], np.float32)
+    render_option.point_color_option = open3d.PointColorOption.ZCoordinate
+    coordinate_frame = open3d.geometry.create_mesh_coordinate_frame()
+    vis.add_geometry(coordinate_frame)
+    view_control = vis.get_view_control()
+    params = view_control.convert_to_pinhole_camera_parameters()
+    params.extrinsic = build_se3_transform([0, 0, 20, np.pi * 0.6, 0, 0])
+    view_control.convert_from_pinhole_camera_parameters(params)
+    vis.run()
