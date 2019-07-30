@@ -42,6 +42,6 @@ end
 velodyne_file = fopen(path);
 data = fread(velodyne_file, 'single');
 fclose(velodyne_file);
-pointcloud = reshape(data, [4 numel(data)/4]);
+pointcloud = reshape(data, [numel(data)/4  4])';
 
 end

@@ -93,6 +93,7 @@ def main():
                 # This is to initialise the geometry
                 pcd.points = open3d.utility.Vector3dVector(ptcld[:3].transpose().astype(np.float64))
                 pcd.colors = open3d.utility.Vector3dVector(np.tile(ptcld[3:].transpose(), (1, 3)).astype(np.float64))
+                pcd.transform(build_se3_transform([0, 0, 0, np.pi, 0, -np.pi/2]))
                 vis.add_geometry(pcd)
                 render_option = vis.get_render_option()
                 render_option.background_color = np.array([0.1529, 0.1569, 0.1333], np.float32)
@@ -101,10 +102,11 @@ def main():
                 vis.add_geometry(coordinate_frame)
                 view_control = vis.get_view_control()
                 params = view_control.convert_to_pinhole_camera_parameters()
-                params.extrinsic = build_se3_transform([0, 0, 20, np.pi * 0.6, 0, 0])
+                # params.extrinsic = build_se3_transform([0, 0, 20, np.pi * 0.6, 0, 0])
+                params.extrinsic = build_se3_transform([0, 3, 10, 0, -np.pi * 0.42, -np.pi/2])
                 view_control.convert_from_pinhole_camera_parameters(params)
 
-            pcd.points = open3d.utility.Vector3dVector(ptcld[[1, 0, 2]].transpose().astype(np.float64) * [[-1, -1, 1]])
+            pcd.points = open3d.utility.Vector3dVector(ptcld[:3].transpose().astype(np.float64))
             pcd.colors = open3d.utility.Vector3dVector(
                 np.tile(ptcld[3:].transpose(), (1, 3)).astype(np.float64) / 40)
             vis.update_geometry()

@@ -21,6 +21,7 @@ function ProjectLaserIntoCamera(image_dir, laser_dir, ins_file, models_dir, extr
 % Authors: 
 %  Geoff Pascoe (gmp@robots.ox.ac.uk)
 %  Will Maddern (wm@robots.ox.ac.uk)
+%  Dan Barnes (dbarnes@robots.ox.ac.uk)
 %
 % This work is licensed under the Creative Commons 
 % Attribution-NonCommercial-ShareAlike 4.0 International License. 

@@ -91,7 +91,9 @@ for i = 1 : numel(vel_timestamps)
         fig.NumberTitle = "off";
         
         if contains(mode, '_ptcld')
-            h{1} = scatter3(ptcld(:, 1), ptcld(:, 2), ptcld(:, 3), 20, ptcld(:, 4), 'filled');
+            h{1} = scatter3(ptcld(1, :), ptcld(2, :), ptcld(3, :), 20, ptcld(4, :), 'filled');
+            set(gca, 'Ydir', 'reverse');
+            set(gca, 'Zdir', 'reverse');
             axis('equal');
             axis([-50, 50, -50, 50, -5, 5]);
             title('Velodyne Pointcloud Visualisation', 'FontSize', 16);
@@ -124,10 +126,10 @@ for i = 1 : numel(vel_timestamps)
         end
     else
         if contains(mode, '_ptcld')
-            h{1}.XData = ptcld(:, 1);
-            h{1}.YData = ptcld(:, 2);
-            h{1}.ZData = ptcld(:, 3);
-            h{1}.CData = ptcld(:, 4);
+            h{1}.XData = ptcld(1, :);
+            h{1}.YData = ptcld(2, :);
+            h{1}.ZData = ptcld(3, :);
+            h{1}.CData = ptcld(4, :);
         else
             h{1}.CData = intensities;
             h{2}.CData = ranges;
