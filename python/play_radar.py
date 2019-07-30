@@ -43,14 +43,14 @@ for radar_timestamp in radar_timestamps:
     if not os.path.isfile(filename):
         raise FileNotFoundError("Could not find radar example: {}".format(filename))
 
-    radar_data = load_radar(filename)
-    cart_img = radar_polar_to_cartesian(radar_data['azimuths'], radar_data['fft_data'], radar_data['resolution'],
-                                        cart_resolution, cart_pixel_width, interpolate_crossover)
+    timestamps, azimuths, valid, fft_data, resolution = load_radar(filename)
+    cart_img = radar_polar_to_cartesian(azimuths, fft_data, resolution, cart_resolution, cart_pixel_width,
+                                        interpolate_crossover)
 
     # Combine polar and cartesian for visualisation
     # The raw polar data is resized to the height of the cartesian representation
     downsample_rate = 4
-    fft_data_vis = radar_data['fft_data'][:, ::downsample_rate]
+    fft_data_vis = fft_data[:, ::downsample_rate]
     resize_factor = float(cart_img.shape[0]) / float(fft_data_vis.shape[0])
     fft_data_vis = cv2.resize(fft_data_vis, (0, 0), None, resize_factor, resize_factor)
     vis = cv2.hconcat((fft_data_vis, fft_data_vis[:, :10] * 0 + 1, cart_img))

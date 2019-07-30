@@ -12,29 +12,21 @@
 #
 ###############################################################################
 
-from typing import AnyStr, Dict
+from typing import AnyStr, Tuple
 import numpy as np
 import cv2
 
 
-def load_radar(example_path: AnyStr, cart_resolution: float = None, cart_pixel_width: int = None,
-               return_cart: bool = False) -> Dict[AnyStr, np.ndarray]:
-    """Decode a single Oxford Radar RobotCar Dataset Example
+def load_radar(example_path: AnyStr) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, float]:
+    """Decode a single Oxford Radar RobotCar Dataset radar example
     Args:
         example_path (AnyStr): Oxford Radar RobotCar Dataset Example png
-        cart_resolution (float, optional): Cartesian resolution (metres per pixel) if `None` cartesian output is skipped
-        cart_pixel_width (int, optional): Width and height of the cartesian output (pixels) if `None` cartesian output is skipped
-        return_cart (bool, optional): Return the cartesian form of the radar scan (as `cart_img` in the returned Dict)
     Returns:
-        Dict[AnyStr, np.ndarray]:
-            Decoded dataset element containing:
-                "timestamps": Timestamp for each azimuth in int64 (UNIX time)
-                "azimuths": Rotation for each polar radar azimuth (radians)
-                "valid": Mask of whether azimuth data is an original sensor reading or interpolated from adjacent azimuths
-                "fft_data": Radar power readings along each azimuth
-                "resolution": Resolution of the polar radar data (metres per pixel)
-    Raises:
-        ValueError: If only one of cart_resolution and cart_pixel_width are passed in.
+        timestamps (np.ndarray): Timestamp for each azimuth in int64 (UNIX time)
+        azimuths (np.ndarray): Rotation for each polar radar azimuth (radians)
+        valid (np.ndarray) Mask of whether azimuth data is an original sensor reading or interpolated from adjacent azimuths
+        fft_data (np.ndarray): Radar power readings along each azimuth
+        resolution (float): Resolution of the polar radar data (metres per pixel)
     """
     # Hard coded configuration to simplify parsing code
     resolution = np.array([0.0432], np.float32)
@@ -46,31 +38,7 @@ def load_radar(example_path: AnyStr, cart_resolution: float = None, cart_pixel_w
     valid = raw_example_data[:, 10:11] == 255
     fft_data = raw_example_data[:, 11:].astype(np.float32)[:, :, np.newaxis] / 255.
 
-    example = {
-        "timestamps": timestamps,
-        "azimuths": azimuths,
-        "valid": valid,
-        "fft_data": fft_data,
-        "resolution": resolution,
-    }
-
-    if (cart_resolution is not None) != (cart_pixel_width is not None):
-        raise ValueError(f"Must pass both or neither of: cart_resolution and cart_pixel_width")
-
-    if cart_resolution is not None and cart_pixel_width is not None:
-        sample_range, sample_angle, polar_to_cart_warp = get_polar_to_cartesian_warping_grid(
-            example["azimuths"], resolution[0], cart_resolution, cart_pixel_width)
-        example.update({
-            "sample_range": sample_range,
-            "sample_angle": sample_angle,
-            "polar_to_cart_warp": polar_to_cart_warp,
-        })
-
-    if return_cart:
-        assert cart_resolution is not None and cart_pixel_width is not None
-        example["cart_img"] = np.expand_dims(cv2.remap(fft_data, polar_to_cart_warp, None, cv2.INTER_LINEAR), -1)
-
-    return example
+    return timestamps, azimuths, valid, fft_data, resolution
 
 
 def radar_polar_to_cartesian(radar_azimuth: np.ndarray, radar_fft: np.ndarray, radar_resolution: float,

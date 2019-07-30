@@ -17,8 +17,8 @@ function pointcloud = VelodyneRangesIntensitiesAnglesToPointcloud( ...
 % NOTES:
 %   - This implementation does *NOT* perform motion compensation on the
 %     generated pointcloud. 
-%   - In practice to use the velodynes effectively consider saving them in 
-%     pointcloud form to disk.
+%   - Accessing the pointclouds in binary form via `LoadVelodynePointcloud` 
+%     is approximately 2x faster at the cost of 8x the storage space
 %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
