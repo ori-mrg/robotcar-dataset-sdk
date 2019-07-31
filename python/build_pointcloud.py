@@ -147,6 +147,7 @@ if __name__ == "__main__":
     else:
         colours = 'gray'
 
+    # Pointcloud Visualisation using Open3D
     vis = open3d.Visualizer()
     vis.create_window(window_name=os.path.basename(__file__))
     render_option = vis.get_render_option()
@@ -155,13 +156,14 @@ if __name__ == "__main__":
     coordinate_frame = open3d.geometry.create_mesh_coordinate_frame()
     vis.add_geometry(coordinate_frame)
     pcd = open3d.geometry.PointCloud()
-    pcd.points = open3d.utility.Vector3dVector(-np.ascontiguousarray(pointcloud[[1, 0, 2]].transpose().astype(np.float64)))
+    pcd.points = open3d.utility.Vector3dVector(
+        -np.ascontiguousarray(pointcloud[[1, 0, 2]].transpose().astype(np.float64)))
     pcd.colors = open3d.utility.Vector3dVector(np.tile(colours[:, np.newaxis], (1, 3)).astype(np.float64))
     # Rotate pointcloud to align displayed coordinate frame colouring
-    pcd.transform(build_se3_transform([0, 0, 0, np.pi, 0, -np.pi/2]))
+    pcd.transform(build_se3_transform([0, 0, 0, np.pi, 0, -np.pi / 2]))
     vis.add_geometry(pcd)
     view_control = vis.get_view_control()
     params = view_control.convert_to_pinhole_camera_parameters()
-    params.extrinsic = build_se3_transform([0, 3, 10, 0, -np.pi * 0.42, -np.pi/2])
+    params.extrinsic = build_se3_transform([0, 3, 10, 0, -np.pi * 0.42, -np.pi / 2])
     view_control.convert_from_pinhole_camera_parameters(params)
     vis.run()

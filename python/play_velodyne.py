@@ -12,19 +12,9 @@
 #
 ################################################################################
 
-"""
-This script can be run with the following -mode options
-    - 'raw' - visualise the raw velodyne data (intensities and ranges)
-    - 'raw_interp' - visualise the raw velodyne data (intensities and ranges) interpolated to consistent azimuth angles
-                     between scans.
-    - 'raw_ptcld' - visualise the raw velodyne data converted to a pointcloud (converts files of the form
-                    <timestamp>.png to pointcloud)
-    - 'bin_ptcld' - visualise the precomputed velodyne pointclouds (files of the form <timestamp>.bin). This is
-                    approximately 2x faster than running the conversion from raw data `raw_ptcld` at the cost of
-                    approximately 8x the storage space.
-"""
 
 import argparse
+from argparse import RawTextHelpFormatter
 import os
 from velodyne import load_velodyne_raw, load_velodyne_pointcloud, velodyne_ranges_intensities_angles_to_pointcloud
 import numpy as np
@@ -34,11 +24,21 @@ from scipy import interpolate
 import open3d
 from transform import build_se3_transform
 
-parser = argparse.ArgumentParser(description='Play back velodyne data from a given directory')
+mode_flag_help = """Mode to run in, one of: (raw|raw_interp|raw_ptcld|bin_ptcld)
+- 'raw' - visualise the raw velodyne data (intensities and ranges)
+- 'raw_interp' - visualise the raw velodyne data (intensities and ranges) interpolated to consistent azimuth angles
+                 between scans.
+- 'raw_ptcld' - visualise the raw velodyne data converted to a pointcloud (converts files of the form
+                <timestamp>.png to pointcloud)
+- 'bin_ptcld' - visualise the precomputed velodyne pointclouds (files of the form <timestamp>.bin). This is
+                approximately 2x faster than running the conversion from raw data `raw_ptcld` at the cost of
+                approximately 8x the storage space.
+"""
 
-parser.add_argument('-mode', default="raw_ptcld", type=str,
-                    help="Mode to run in, one of: (raw|raw_interp|raw_ptcld|bin_ptcld)")
-parser.add_argument('-scale', default=2., type=float, help="Scale visualisations by this amount")
+parser = argparse.ArgumentParser(description='Play back velodyne data from a given directory',
+                                 formatter_class=RawTextHelpFormatter)
+parser.add_argument('--mode', default="raw_interp", type=str, help=mode_flag_help)
+parser.add_argument('--scale', default=2., type=float, help="Scale visualisations by this amount")
 parser.add_argument('dir', type=str, help='Directory containing velodyne data.')
 
 args = parser.parse_args()
@@ -59,7 +59,6 @@ def main():
 
     title = "Oxford Radar RobotCar Dataset: Visualisation Example"
     extension = ".bin" if args.mode == "bin_ptcld" else ".png"
-    colourmap = None
     velodyne_timestamps = np.loadtxt(timestamps_path, delimiter=' ', usecols=[0], dtype=np.int64)
     colourmap = (get_cmap("viridis")(np.linspace(0, 1, 255))[:, :3] * 255).astype(np.uint8)[:, ::-1]
     interp_angles = np.mod(np.linspace(np.pi, 3 * np.pi, 720), 2 * np.pi)
@@ -82,15 +81,16 @@ def main():
                 intensities[np.isnan(intensities)] = 0
                 ranges[np.isnan(ranges)] = 0
 
-        # Generate visualisation
         if '_ptcld' in args.mode:
+            # Pointcloud Visualisation using Open3D
             if vis is None:
                 vis = open3d.Visualizer()
                 vis.create_window(window_name=title)
                 pcd = open3d.geometry.PointCloud()
-                # This is to initialise the geometry
+                # initialise the geometry pre loop
                 pcd.points = open3d.utility.Vector3dVector(ptcld[:3].transpose().astype(np.float64))
                 pcd.colors = open3d.utility.Vector3dVector(np.tile(ptcld[3:].transpose(), (1, 3)).astype(np.float64))
+                # Rotate pointcloud to align displayed coordinate frame colouring
                 pcd.transform(build_se3_transform([0, 0, 0, np.pi, 0, -np.pi / 2]))
                 vis.add_geometry(pcd)
                 render_option = vis.get_render_option()
@@ -99,8 +99,9 @@ def main():
                 coordinate_frame = open3d.geometry.create_mesh_coordinate_frame()
                 vis.add_geometry(coordinate_frame)
                 view_control = vis.get_view_control()
+                print(dir(view_control))
+                print(dir(render_option))
                 params = view_control.convert_to_pinhole_camera_parameters()
-                # params.extrinsic = build_se3_transform([0, 0, 20, np.pi * 0.6, 0, 0])
                 params.extrinsic = build_se3_transform([0, 3, 10, 0, -np.pi * 0.42, -np.pi / 2])
                 view_control.convert_from_pinhole_camera_parameters(params)
 
@@ -112,6 +113,7 @@ def main():
             vis.update_renderer()
 
         else:
+            # Ranges and Intensities visualisation using OpenCV
             intensities_vis = colourmap[np.clip((intensities * 4).astype(np.int), 0, colourmap.shape[0] - 1)]
             ranges_vis = colourmap[np.clip((ranges * 4).astype(np.int), 0, colourmap.shape[0] - 1)]
             visualisation = np.concatenate((intensities_vis, ranges_vis), 0)
