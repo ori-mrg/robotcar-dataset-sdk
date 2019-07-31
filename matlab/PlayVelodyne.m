@@ -1,6 +1,6 @@
 function PlayVelodyne(directory, mode)
 
-% PlayVelodyne - display radar from a given dataset
+% PlayVelodyne - display velodyne from a given dataset
 %
 % PlayVelodyne(directory)
 %
@@ -9,8 +9,10 @@ function PlayVelodyne(directory, mode)
 %     - A Velodyne data directory (eg. <dataset>/velodyne_left)
 %   mode: Mode to run in, one of: (default: raw_interp)
 %     - raw - visualise the raw velodyne data (intensities and ranges)
+%       (files of the form  <timestamp>.png)
 %     - raw_interp - visualise the raw velodyne data (intensities and 
 %       ranges) interpolated to consistent azimuth angles between scans.
+%       (files of the form  <timestamp>.png)
 %     - raw_ptcld - visualise the raw velodyne data converted to a
 %       pointcloud (converts files of the form <timestamp>.png to
 %       pointcloud)
@@ -60,7 +62,7 @@ h = [];
 interp_angles = wrapTo2Pi(linspace(pi, 3*pi, 720));
 for i = 1 : numel(vel_timestamps)
     
-    % Decode radar example
+    % Decode velodyne example
     if strcmp(mode, 'bin_ptcld')
         ptcld = LoadVelodynePointcloud(directory, vel_timestamps(i));
     else
@@ -87,7 +89,7 @@ for i = 1 : numel(vel_timestamps)
     if isempty(h)
         fig = figure(72327);
         clf;
-        fig.Name = "Oxford Radar RobotCar Dataset: Visualisation Example";
+        fig.Name = "Velodyne Visualisation Example";
         fig.NumberTitle = "off";
         
         if contains(mode, '_ptcld')

@@ -59,7 +59,7 @@ for i = 1 : numel(radar_timestamps)
     fft_data_vis = fft_data(:, 1:downsample_rate:end);
     if isempty(h)
         fig = figure(72327);
-        fig.Name = "Oxford Radar RobotCar Dataset: Visualisation Example";
+        fig.Name = "Radar Visualisation Example";
         fig.NumberTitle = "off";
         
         range_ticks = ((1:size(fft_data_vis, 2))-0.5) * ...

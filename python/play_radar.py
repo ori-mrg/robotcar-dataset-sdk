@@ -34,7 +34,7 @@ cart_resolution = .25  # metres per pixel
 cart_pixel_width = 501  # pixels
 interpolate_crossover = True
 
-title = "Oxford Radar RobotCar Dataset: Visualisation Example"
+title = "Radar Visualisation Example"
 
 radar_timestamps = np.loadtxt(timestamps_path, delimiter=' ', usecols=[0], dtype=np.int64)
 for radar_timestamp in radar_timestamps:

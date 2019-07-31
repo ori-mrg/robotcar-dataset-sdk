@@ -57,7 +57,7 @@ def main():
     if not os.path.isfile(timestamps_path):
         raise IOError("Could not find timestamps file: {}".format(timestamps_path))
 
-    title = "Oxford Radar RobotCar Dataset: Visualisation Example"
+    title = "Velodyne Visualisation Example"
     extension = ".bin" if args.mode == "bin_ptcld" else ".png"
     velodyne_timestamps = np.loadtxt(timestamps_path, delimiter=' ', usecols=[0], dtype=np.int64)
     colourmap = (get_cmap("viridis")(np.linspace(0, 1, 255))[:, :3] * 255).astype(np.uint8)[:, ::-1]

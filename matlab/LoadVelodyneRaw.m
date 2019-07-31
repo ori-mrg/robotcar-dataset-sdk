@@ -4,7 +4,7 @@ function [ranges, intensities, angles, approximate_timestamps] = ...
 % LoadVelodyneRaw - Decode a raw velodyne example.
 %
 % INPUTS:
-%   directory: directory containing velodyne data named <timestamp>.png
+%   directory: directory containing velodyne raw data named <timestamp>.png
 %   timestamp: timestamp of velodyne data to load
 %
 % OUTPUTS:

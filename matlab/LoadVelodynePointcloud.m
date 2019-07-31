@@ -3,7 +3,8 @@ function pointcloud = LoadVelodynePointcloud(directory, timestamp)
 % LoadVelodynePointcloud - Decode a raw velodyne example.
 %
 % INPUTS:
-%   directory: directory containing velodyne data named <timestamp>.png
+%   directory: directory containing velodyne binary data named
+%   <timestamp>.bin
 %   timestamp: timestamp of velodyne data to load
 %
 % OUTPUTS:

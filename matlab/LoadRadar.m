@@ -7,7 +7,6 @@ function [timestamps, azimuths, valid, fft_data, resolution] = ...
 %   directory: directory containing radar data named <timestamp>.png
 %   timestamp: timestamp of radar data to load
 %
-%
 % OUTPUTS:
 %   timestamps: Timestamp for each azimuth in int64 (UNIX time)
 %   azimuths: Rotation for each polar radar azimuth (radians)
