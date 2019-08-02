@@ -13,7 +13,6 @@ function [timestamps, azimuths, valid, fft_data, resolution] = ...
 %   valid: Mask of whether azimuth data is an original sensor reading or
 %       interpolated from adjacent azimuths
 %   fft_data: Radar power readings along each azimuth
-%   timestamp_mid: Timestamp of the centre of the scan in int64 (UNIX time)
 %   resolution: Resolution of the polar radar data (metres per pixel)
 %
 
