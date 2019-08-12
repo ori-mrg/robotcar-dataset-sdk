@@ -126,7 +126,7 @@ function [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, extrin
         end
     else
         if exist(scan_path, 'file')
-            ptcld = LoadVelodynePointcloud(laser_dir, num2str(laser_timestamps(i,1)));
+            ptcld = LoadVelodyneBinary(laser_dir, num2str(laser_timestamps(i,1)));
         else
             scan_path = [laser_dir num2str(laser_timestamps(i,1)) '.png'];
             if ~exist(scan_path, 'file')
@@ -134,8 +134,7 @@ function [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, extrin
             end
             [ranges, intensities, angles, ~] = ...
                 LoadVelodyneRaw(laser_dir, num2str(laser_timestamps(i,1)));
-            ptcld = VelodyneRangesIntensitiesAnglesToPointcloud(ranges, ...
-                intensities, angles);
+            ptcld = VelodyneRawToPointcloud(ranges, intensities, angles);
         end
         scan = ptcld(1:3, :);
         reflectance = [reflectance ptcld(4, :)];

@@ -133,10 +133,11 @@ def so3_to_quaternion(so3):
         # w is non-real
         w = 0
 
-    eps = 1e-15
-    x = sqrt(1 + R_xx - R_yy - R_zz + eps) / 2
-    y = sqrt(1 + R_yy - R_xx - R_zz + eps) / 2
-    z = sqrt(1 + R_zz - R_yy - R_xx + eps) / 2
+    # Due to numerical precision the value passed to `sqrt` may be a negative of the order 1e-15.
+    # To avoid this error we clip these values to a minimum value of 0.
+    x = sqrt(max(1 + R_xx - R_yy - R_zz, 0)) / 2
+    y = sqrt(max(1 + R_yy - R_xx - R_zz, 0)) / 2
+    z = sqrt(max(1 + R_zz - R_yy - R_xx, 0)) / 2
 
     max_index = max(range(4), key=[w, x, y, z].__getitem__)
 

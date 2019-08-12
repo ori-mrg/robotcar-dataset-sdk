@@ -1,15 +1,14 @@
-function pointcloud = VelodyneRangesIntensitiesAnglesToPointcloud( ...
-    ranges, intensities, angles)
+function pointcloud = VelodyneRawToPointcloud(ranges, intensities, angles)
 %
-% VelodyneRangesIntensitiesAnglesToPointcloud - Convert raw velodyne data
-%   to a pointcloud
+% VelodyneRawToPointcloud - Convert raw Velodyne HDL32E scan as provided by 
+%       LoadVelodyneRaw to a pointcloud
 %
-% pointcloud = VelodyneRangesIntensitiesAnglesToPointcloud( ...
-%     ranges, intensities, angles)
+% pointcloud = VelodyneRawToPointcloud(ranges, intensities, angles)
+%
 % INPUTS:
-%   ranges: Raw velodyne range readings
-%   intensities: Raw velodyne intensity readings
-%   angles: Raw velodyne angles
+%   ranges: Raw Velodyne range readings
+%   intensities: Raw Velodyne intensity readings
+%   angles: Raw Velodyne angles
 %
 % OUTPUTS:
 %   pointcloud: XYZI pointcloud generated from the raw Velodyne data Nx4

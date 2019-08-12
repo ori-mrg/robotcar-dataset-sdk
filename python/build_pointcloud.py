@@ -18,7 +18,7 @@ import numpy as np
 
 from transform import build_se3_transform
 from interpolate_poses import interpolate_vo_poses, interpolate_ins_poses
-from velodyne import load_velodyne_raw, load_velodyne_pointcloud, velodyne_ranges_intensities_angles_to_pointcloud
+from velodyne import load_velodyne_raw, load_velodyne_binary, velodyne_raw_to_pointcloud
 
 
 def build_pointcloud(lidar_dir, poses_file, extrinsics_dir, start_time, end_time, origin_time=-1):
@@ -98,13 +98,13 @@ def build_pointcloud(lidar_dir, poses_file, extrinsics_dir, start_time, end_time
                 scan[2, :] = np.zeros((1, scan.shape[1]))
         else:
             if os.path.isfile(scan_path):
-                ptcld = load_velodyne_pointcloud(scan_path)
+                ptcld = load_velodyne_binary(scan_path)
             else:
                 scan_path = os.path.join(lidar_dir, str(timestamps[i]) + '.png')
                 if not os.path.isfile(scan_path):
                     continue
                 ranges, intensities, angles, approximate_timestamps = load_velodyne_raw(scan_path)
-                ptcld = velodyne_ranges_intensities_angles_to_pointcloud(ranges, intensities, angles)
+                ptcld = velodyne_raw_to_pointcloud(ranges, intensities, angles)
 
             reflectance = np.concatenate((reflectance, ptcld[3]))
             scan = ptcld[:3]

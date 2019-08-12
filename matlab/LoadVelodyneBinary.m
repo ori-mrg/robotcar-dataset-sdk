@@ -1,11 +1,11 @@
-function pointcloud = LoadVelodynePointcloud(directory, timestamp)
+function pointcloud = LoadVelodyneBinary(directory, timestamp)
 %
-% LoadVelodynePointcloud - Decode a raw velodyne example.
+% LoadVelodyneBinary - Decode a binary Velodyne example.
 %
 % INPUTS:
-%   directory: directory containing velodyne binary data named
-%   <timestamp>.bin
-%   timestamp: timestamp of velodyne data to load
+%   directory: directory containing Velodyne binary data named
+%       <timestamp>.bin
+%   timestamp: timestamp of binary Velodyne scan to load
 %
 % OUTPUTS:
 %   pointcloud: XYZI pointcloud generated from the raw Velodyne data Nx4

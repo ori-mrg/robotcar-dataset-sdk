@@ -60,18 +60,20 @@ vel_timestamps = vel_timestamps(:, 1);
 
 h = [];
 interp_angles = wrapTo2Pi(linspace(pi, 3*pi, 720));
-for i = 1 : numel(vel_timestamps)
+% Here we start at frame 2 so that we have a full 360 degree scan to start 
+% at so that the visualisation code can be more optimal. 
+for i = 2 : numel(vel_timestamps)
     
     % Decode velodyne example
     if strcmp(mode, 'bin_ptcld')
-        ptcld = LoadVelodynePointcloud(directory, vel_timestamps(i));
+        ptcld = LoadVelodyneBinary(directory, vel_timestamps(i));
     else
         [ranges, intensities, angles, approximate_timestamps] = ...
             LoadVelodyneRaw(directory, vel_timestamps(i));
         % A pointcloud can be extracted directly from the raw scan, 
         % although it is approximately 2x slower, by running:
         if strcmp(mode, 'raw_ptcld')
-            ptcld = VelodyneRangesIntensitiesAnglesToPointcloud(ranges, intensities, angles);
+            ptcld = VelodyneRawToPointcloud(ranges, intensities, angles);
         elseif strcmp(mode, 'raw_interp')
             % Account any overlap (could have spun more than 2 * pi)
             crossover = find(angles < angles(1), 1, 'last');
@@ -115,7 +117,7 @@ for i = 1 : numel(vel_timestamps)
 
             % Range Plot
             subplot(2, 1, 2, 'align');
-            h{2} = imagesc(ranges, [0, max(intensities(:))/3]);
+            h{2} = imagesc(ranges, [0, max(ranges(:))/2]);
             ylabel('Elevation (radians)', 'FontSize', 14);
             if strcmp(mode, 'raw_interp')
                 xticklabels(angles(xticks));

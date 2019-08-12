@@ -1,21 +1,25 @@
 function [ranges, intensities, angles, approximate_timestamps] = ...
     LoadVelodyneRaw(directory, timestamp)
 %
-% LoadVelodyneRaw - Decode a raw velodyne example.
+% LoadVelodyneRaw - Decode a raw Velodyne example.
 %
 % INPUTS:
-%   directory: directory containing velodyne raw data named <timestamp>.png
-%   timestamp: timestamp of velodyne data to load
+%   directory: directory containing Velodyne raw data named <timestamp>.png
+%   timestamp: timestamp of Velodyne data to load
 %
 % OUTPUTS:
-%   ranges: Range of each measurement in meters where 0 == invalid, (32 x N)
+%   ranges: Range of each measurement in meters where 0 == invalid, 
+%       (32 x N)
 %   intensities: Intensity of each measurement where 0 == invalid, (32 x N)
 %   angles: Angle of each measurement in radians (1 x N)
-%   approximate_timestamps: Approximate linearly interpolated timestamps of each mesaurement (1 x N). Approximate as
-%       we only receive timestamps for each packet. The timestamp of the next frame will be used to iterpolate the
-%       last packet timestamps. If there is no next frame, the last packet will be extrapolated. The original packet
+%   approximate_timestamps: Approximate linearly interpolated timestamps of 
+%       each mesaurement (1 x N). Approximate as we only receive timestamps 
+%       for each packet. The timestamp of the next frame was used to 
+%       interpolate the last packet timestamps. If there was no next frame, 
+%       the last packet timestamps was extrapolated. The original packet
 %       timestamps can be recovered with:
-%           approximate_timestamps(:, 1:12:end) (12 is the number of angles in each packet)
+%           approximate_timestamps(:, 1:12:end) 
+%           (12 is the number of azimuth returns in each packet)
 %
 % NOTES:
 %   Reference: https://velodynelidar.com/lidar/products/manual/63-9113%20HDL-32E%20manual_Rev%20E_NOV2012.pdf

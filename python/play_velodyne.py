@@ -16,7 +16,7 @@
 import argparse
 from argparse import RawTextHelpFormatter
 import os
-from velodyne import load_velodyne_raw, load_velodyne_pointcloud, velodyne_ranges_intensities_angles_to_pointcloud
+from velodyne import load_velodyne_raw, load_velodyne_binary, velodyne_raw_to_pointcloud
 import numpy as np
 import cv2
 from matplotlib.cm import get_cmap
@@ -69,12 +69,12 @@ def main():
         filename = os.path.join(args.dir, str(velodyne_timestamp) + extension)
 
         if args.mode == "bin_ptcld":
-            ptcld = load_velodyne_pointcloud(filename)
+            ptcld = load_velodyne_binary(filename)
         else:
             ranges, intensities, angles, approximate_timestamps = load_velodyne_raw(filename)
 
             if args.mode == "raw_ptcld":
-                ptcld = velodyne_ranges_intensities_angles_to_pointcloud(ranges, intensities, angles)
+                ptcld = velodyne_raw_to_pointcloud(ranges, intensities, angles)
             elif args.mode == "raw_interp":
                 intensities = interpolate.interp1d(angles[0], intensities, bounds_error=False)(interp_angles)
                 ranges = interpolate.interp1d(angles[0], ranges, bounds_error=False)(interp_angles)

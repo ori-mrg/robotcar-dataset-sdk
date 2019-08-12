@@ -29,8 +29,9 @@ if not os.path.isfile(timestamps_path):
     raise IOError("Could not find timestamps file")
 
 # Cartesian Visualsation Setup
-cart_resolution = .25  # metres per pixel
-# Cartesian visualisation height and width
+# Resolution of the cartesian form of the radar scan in metres per pixel
+cart_resolution = .25
+# Cartesian visualisation size (used for both height and width)
 cart_pixel_width = 501  # pixels
 interpolate_crossover = True
 
@@ -43,8 +44,8 @@ for radar_timestamp in radar_timestamps:
     if not os.path.isfile(filename):
         raise FileNotFoundError("Could not find radar example: {}".format(filename))
 
-    timestamps, azimuths, valid, fft_data, resolution = load_radar(filename)
-    cart_img = radar_polar_to_cartesian(azimuths, fft_data, resolution, cart_resolution, cart_pixel_width,
+    timestamps, azimuths, valid, fft_data, radar_resolution = load_radar(filename)
+    cart_img = radar_polar_to_cartesian(azimuths, fft_data, radar_resolution, cart_resolution, cart_pixel_width,
                                         interpolate_crossover)
 
     # Combine polar and cartesian for visualisation

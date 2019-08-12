@@ -30,16 +30,16 @@ hdl32e_cos_elevations = np.cos(hdl32e_elevations)
 hdl32e_sin_elevations = np.sin(hdl32e_elevations)
 
 
-def load_velodyne_pointcloud(velodyne_bin_path: AnyStr):
-    """Decode a single Oxford Radar RobotCar Dataset binary velodyne pointcloud example (of the form '<timestamp>.bin')
+def load_velodyne_binary(velodyne_bin_path: AnyStr):
+    """Decode a binary Velodyne example (of the form '<timestamp>.bin')
     Args:
-        example_path (AnyStr): Oxford Radar RobotCar Dataset binary velodyne pointcloud example path
+        example_path (AnyStr): Oxford Radar RobotCar Dataset binary Velodyne pointcloud example path
     Returns:
-        ptcld (np.ndarray): XYZI pointcloud generated from the raw Velodyne data Nx4
+        ptcld (np.ndarray): XYZI pointcloud from the binary Velodyne data Nx4
     Notes:
         - The pre computed points are *NOT* motion compensated.
         - Converting a raw velodyne scan to pointcloud can be done using the
-        `velodyne_ranges_intensities_angles_to_pointcloud` function.
+            `velodyne_ranges_intensities_angles_to_pointcloud` function.
     """
     ext = os.path.splitext(velodyne_bin_path)[1]
     if ext != ".bin":
@@ -52,18 +52,20 @@ def load_velodyne_pointcloud(velodyne_bin_path: AnyStr):
 
 
 def load_velodyne_raw(velodyne_raw_path: AnyStr):
-    """Decode a single Oxford Radar RobotCar Dataset raw velodyne example (of the form '<timestamp>.png')
+    """Decode a raw Velodyne example. (of the form '<timestamp>.png')
     Args:
-        example_path (AnyStr): Oxford Radar RobotCar Dataset raw velodyne example path
+        example_path (AnyStr): Oxford Radar RobotCar Dataset raw Velodyne example path
     Returns:
         ranges (np.ndarray): Range of each measurement in meters where 0 == invalid, (32 x N)
         intensities (np.ndarray): Intensity of each measurement where 0 == invalid, (32 x N)
         angles (np.ndarray): Angle of each measurement in radians (1 x N)
         approximate_timestamps (np.ndarray): Approximate linearly interpolated timestamps of each mesaurement (1 x N).
-            Approximate as we only receive timestamps for each packet. The timestamp of the next frame will be used to
-            iterpolate the last packet timestamps. If there is no next frame, the last packet will be extrapolated.
-            The original packet timestamps can be recovered with:
-                approximate_timestamps(:, 1:12:end) (12 is the number of angles in each packet)
+            Approximate as we only receive timestamps for each packet. The timestamp of the next frame will was used to
+            interpolate the last packet timestamps. If there was no next frame, the last packet timestamps was
+            extrapolated. The original packet timestamps can be recovered with:
+                approximate_timestamps(:, 1:12:end) (12 is the number of azimuth returns in each packet)
+     Notes:
+       Reference: https://velodynelidar.com/lidar/products/manual/63-9113%20HDL-32E%20manual_Rev%20E_NOV2012.pdf
     """
     ext = os.path.splitext(velodyne_raw_path)[1]
     if ext != ".png":
@@ -80,12 +82,12 @@ def load_velodyne_raw(velodyne_raw_path: AnyStr):
     return ranges, intensities, angles, approximate_timestamps
 
 
-def velodyne_ranges_intensities_angles_to_pointcloud(ranges: np.ndarray, intensities: np.ndarray, angles: np.ndarray):
-    """ Convert raw velodyne data  (from load_velodyne_raw) into a pointcloud
+def velodyne_raw_to_pointcloud(ranges: np.ndarray, intensities: np.ndarray, angles: np.ndarray):
+    """ Convert raw Velodyne data (from load_velodyne_raw) into a pointcloud
     Args:
-        ranges (np.ndarray): Raw velodyne range readings
-        intensities (np.ndarray): Raw velodyne intensity readings
-        angles (np.ndarray): Raw velodyne angles
+        ranges (np.ndarray): Raw Velodyne range readings
+        intensities (np.ndarray): Raw Velodyne intensity readings
+        angles (np.ndarray): Raw Velodyne angles
     Returns:
         pointcloud (np.ndarray): XYZI pointcloud generated from the raw Velodyne data Nx4
 

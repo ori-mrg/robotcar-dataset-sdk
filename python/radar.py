@@ -24,12 +24,13 @@ def load_radar(example_path: AnyStr) -> Tuple[np.ndarray, np.ndarray, np.ndarray
     Returns:
         timestamps (np.ndarray): Timestamp for each azimuth in int64 (UNIX time)
         azimuths (np.ndarray): Rotation for each polar radar azimuth (radians)
-        valid (np.ndarray) Mask of whether azimuth data is an original sensor reading or interpolated from adjacent azimuths
+        valid (np.ndarray) Mask of whether azimuth data is an original sensor reading or interpolated from adjacent
+            azimuths
         fft_data (np.ndarray): Radar power readings along each azimuth
-        resolution (float): Resolution of the polar radar data (metres per pixel)
+        radar_resolution (float): Resolution of the polar radar data (metres per pixel)
     """
     # Hard coded configuration to simplify parsing code
-    resolution = np.array([0.0432], np.float32)
+    radar_resolution = np.array([0.0432], np.float32)
     encoder_size = 5600
 
     raw_example_data = cv2.imread(example_path, cv2.IMREAD_GRAYSCALE)
@@ -38,20 +39,21 @@ def load_radar(example_path: AnyStr) -> Tuple[np.ndarray, np.ndarray, np.ndarray
     valid = raw_example_data[:, 10:11] == 255
     fft_data = raw_example_data[:, 11:].astype(np.float32)[:, :, np.newaxis] / 255.
 
-    return timestamps, azimuths, valid, fft_data, resolution
+    return timestamps, azimuths, valid, fft_data, radar_resolution
 
 
-def radar_polar_to_cartesian(radar_azimuth: np.ndarray, radar_fft: np.ndarray, radar_resolution: float,
+def radar_polar_to_cartesian(azimuths: np.ndarray, fft_data: np.ndarray, radar_resolution: float,
                              cart_resolution: float, cart_pixel_width: int, interpolate_crossover=True) -> np.ndarray:
     """Convert a polar radar scan to cartesian.
     Args:
-        radar_azimuth (np.ndarray): Rotation for each polar radar azimuth (radians)
-        radar_fft (np.ndarray): Polar radar power readings
+        azimuths (np.ndarray): Rotation for each polar radar azimuth (radians)
+        fft_data (np.ndarray): Polar radar power readings
         radar_resolution (float): Resolution of the polar radar data (metres per pixel)
         cart_resolution (float): Cartesian resolution (metres per pixel)
-        cart_pixel_width (int): Width and height of the cartesian output (pixels)
-        interpolate_crossover (bool, optional): If true interpolates between the end and start
-           azimuth of the scan. In practice a scan before / after should be used.
+        cart_pixel_size (int): Width and height of the returned square cartesian output (pixels). Please see the Notes
+            below for a full explanation of how this is used.
+        interpolate_crossover (bool, optional): If true interpolates between the end and start  azimuth of the scan. In
+            practice a scan before / after should be used but this prevents nan regions in the return cartesian form.
 
     Returns:
         np.ndarray: Cartesian radar power readings
@@ -124,9 +126,9 @@ def radar_polar_to_cartesian(radar_azimuth: np.ndarray, radar_fft: np.ndarray, r
     sample_angle += (sample_angle < 0).astype(np.float32) * 2. * np.pi
 
     # Interpolate Radar Data Coordinates
-    azimuth_step = radar_azimuth[1] - radar_azimuth[0]
+    azimuth_step = azimuths[1] - azimuths[0]
     sample_u = (sample_range - radar_resolution / 2) / radar_resolution
-    sample_v = (sample_angle - radar_azimuth[0]) / azimuth_step
+    sample_v = (sample_angle - azimuths[0]) / azimuth_step
 
     # We clip the sample points to the minimum sensor reading range so that we
     # do not have undefined results in the centre of the image. In practice
@@ -134,9 +136,9 @@ def radar_polar_to_cartesian(radar_azimuth: np.ndarray, radar_fft: np.ndarray, r
     sample_u[sample_u < 0] = 0
 
     if interpolate_crossover:
-        radar_fft = np.concatenate((radar_fft[-1:], radar_fft, radar_fft[:1]), 0)
+        fft_data = np.concatenate((fft_data[-1:], fft_data, fft_data[:1]), 0)
         sample_v = sample_v + 1
 
     polar_to_cart_warp = np.stack((sample_u, sample_v), -1)
-    cart_img = np.expand_dims(cv2.remap(radar_fft, polar_to_cart_warp, None, cv2.INTER_LINEAR), -1)
+    cart_img = np.expand_dims(cv2.remap(fft_data, polar_to_cart_warp, None, cv2.INTER_LINEAR), -1)
     return cart_img

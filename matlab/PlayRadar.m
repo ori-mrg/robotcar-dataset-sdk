@@ -34,9 +34,10 @@ if ~strcmp(path_end, "radar")
 end
 
 % Cartesian Visualsation Setup
-cart_resolution = .25; % metres per pixel
-% Cartesian visualisation height and width
-cart_pixel_width = 501; % pixels
+% Resolution of the cartesian form of the radar scan in metres per pixel
+cart_resolution = .25; 
+% Cartesian visualisation size (used for both height and width)
+cart_pixel_size = 501; % pixels
 interpolate_crossover = true;
 
 radar_timestamps = dlmread([directory '.timestamps']);
@@ -46,13 +47,13 @@ h = [];
 for i = 1 : numel(radar_timestamps)
     
     % Decode radar example
-    [timestamps, azimuths, valid, fft_data, resolution] = ...
+    [timestamps, azimuths, valid, fft_data, radar_resolution] = ...
         LoadRadar(directory, radar_timestamps(i));
     
     % Convert radar example to cartesian
     cart_img = RadarPolarToCartesian( ...
-        azimuths, fft_data, resolution, cart_resolution, ...
-        cart_pixel_width, interpolate_crossover);
+        azimuths, fft_data, radar_resolution, cart_resolution, ...
+        cart_pixel_size, interpolate_crossover);
     
     % Downsample radar data to speed up visualisation
     downsample_rate = 4;
@@ -63,7 +64,7 @@ for i = 1 : numel(radar_timestamps)
         fig.NumberTitle = "off";
         
         range_ticks = ((1:size(fft_data_vis, 2))-0.5) * ...
-            resolution * downsample_rate;
+            radar_resolution * downsample_rate;
         
         % Polar Plot
         colormap gray;
@@ -76,9 +77,9 @@ for i = 1 : numel(radar_timestamps)
         title('Polar Radar Visualisation', 'FontSize', 14);
         
         % Cartesian Plot
-        pixel_range = floor(cart_pixel_width / 2);
+        pixel_range = floor(cart_pixel_size / 2);
         tick_labels = (-pixel_range:pixel_range) * cart_resolution;
-        tick_locs = [1, pixel_range+1, cart_pixel_width];
+        tick_locs = [1, pixel_range+1, cart_pixel_size];
         subplot(1, 2, 2, 'align');
         h{2} = imagesc(cart_img, [0, 0.5]);
         xticks(tick_locs);

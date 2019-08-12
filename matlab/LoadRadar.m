@@ -1,4 +1,4 @@
-function [timestamps, azimuths, valid, fft_data, resolution] = ...
+function [timestamps, azimuths, valid, fft_data, radar_resolution] = ...
     LoadRadar(directory, timestamp)
 %
 % LoadRadar - Decode a radar dataset example.
@@ -13,7 +13,7 @@ function [timestamps, azimuths, valid, fft_data, resolution] = ...
 %   valid: Mask of whether azimuth data is an original sensor reading or
 %       interpolated from adjacent azimuths
 %   fft_data: Radar power readings along each azimuth
-%   resolution: Resolution of the polar radar data (metres per pixel)
+%   radar_resolution: Resolution of the polar radar data (metres per pixel)
 %
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -41,7 +41,7 @@ if ~exist(path, 'file')
 end
 
 % Hard coded configuration to simplify parsing code
-resolution = 0.0432;  % m / pixel
+radar_resolution = 0.0432;  % m / pixel
 encoder_size = 5600;  % encoder ticks
 
 % Parse data from image file
