@@ -3,4 +3,4 @@ matplotlib
 colour_demosaicing
 pillow
 opencv-python
-open3d
+open3d-python
