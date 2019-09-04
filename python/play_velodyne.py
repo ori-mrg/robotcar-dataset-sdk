@@ -99,8 +99,6 @@ def main():
                 coordinate_frame = open3d.geometry.create_mesh_coordinate_frame()
                 vis.add_geometry(coordinate_frame)
                 view_control = vis.get_view_control()
-                print(dir(view_control))
-                print(dir(render_option))
                 params = view_control.convert_to_pinhole_camera_parameters()
                 params.extrinsic = build_se3_transform([0, 3, 10, 0, -np.pi * 0.42, -np.pi / 2])
                 view_control.convert_from_pinhole_camera_parameters(params)

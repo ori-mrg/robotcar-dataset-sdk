@@ -29,27 +29,27 @@ Command Line Tools
 The `play_images.py` script can be used to view images from the dataset.
 
 ```bash
-python play_images.py --images_dir /path/to/data/yyyy-mm-dd-hh-mm-ss/stereo/centre
+python play_images.py /path/to/data/yyyy-mm-dd-hh-mm-ss/stereo/centre
 ```
 
 If you wish to undistort the images before viewing them, pass the camera model directory as a second argument:
 
 ```bash
-python play_images.py --images_dir /path/to/data/yyyy-mm-dd-hh-mm-ss/stereo/centre --models_dir /path/to/camera/models
+python play_images.py /path/to/data/yyyy-mm-dd-hh-mm-ss/stereo/centre --models_dir /path/to/camera/models
 ```
 
 ### Viewing Radar Scans
 The `play_radar.py` script can be used to view radar scans.
 
 ```bash
-python play_radar.py --images_dir /path/to/data/yyyy-mm-dd-hh-mm-ss/radar
+python play_radar.py /path/to/data/yyyy-mm-dd-hh-mm-ss/radar
 ```
 
 ### Viewing Velodyne Scans
 The `play_velodyne.py` script can be used to view velodyne scans from raw or binary form.
 
 ```bash
-python play_velodyne.py --images_dir /path/to/data/yyyy-mm-dd-hh-mm-ss/velodyne_left
+python play_velodyne.py /path/to/data/yyyy-mm-dd-hh-mm-ss/velodyne_left
 ```
 
 ### Building Pointclouds
@@ -57,7 +57,7 @@ The `build_pointcloud.py` script builds and displays a 3D pointcloud by combinin
 The pose source can be either INS data or the supplied visual odometry data. For example:
 
 ```bash
-python build_pointcloud.py --laser_dir /path/to/data/yyyy-mm-dd-hh-mm-ss/lms_front --extrinsics_dir ../extrinsics --poses_file /path/to/data/yyyy-mm-dd-hh-mm-ss/vo/vo.csv'
+python build_pointcloud.py --laser_dir /path/to/data/yyyy-mm-dd-hh-mm-ss/lms_front --extrinsics_dir ../extrinsics --poses_file /path/to/data/yyyy-mm-dd-hh-mm-ss/vo/vo.csv
 ```
 
 ### Projecting pointclouds into images
@@ -77,10 +77,7 @@ The scripts here are also designed to be used in your own scripts.
 * `interpolate_poses.py`: functions for interpolating VO or INS data to obtain pose estimates at arbitrary timestamps
 * `transform.py`: functions for converting between various transform representations
 * `image.py`: function for loading, Bayer demosaicing and undistorting images
-* `load_velodyne_raw.py`: reads a raw Velodyne scan from a specified directory and at a specified timestamp
-* `velodyne_raw_to_pointcloud.py`: takes the ranges(m), intensities (uint8), and azimuth angles (rad) from a decoded raw Velodyne scan and produce a pointcloud in cartesian form including per-point intensity values
-* `load_velodyne_binary.py`: reads a binary Velodyne scan from a specified directory and at a specified timestamp and returns a pointcloud in cartesian form including per-point intensity values
-* `load_radar.py`: reads a raw radar scan from a specified directory and at a specified timestamp, and returns the per-azimuth UNIX timestamps (microsec), azimuth angles (rad), and power returns (dB) as well as the range resolution (cm)
-* `radar_polar_to_cartesian.py`: takes the azimuth angles (rad), power returns (dB) and radar range resolution (cm) from a decoded radar scan and converts the polar scan into cartesian form according to a desired cartesian resolution (m) and cartesian size (px)
+* `velodyne.py`: functions for loading Velodyne scan data and converting a raw scan representation to pointcloud
+* `radar.py`: functions for loading radar scan data and converting a polar scan representation to Cartesian
 
 For examples of how to use these functions, see the command line tools above.
