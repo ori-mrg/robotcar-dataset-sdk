@@ -72,7 +72,7 @@ image = load_image(image_path, model)
 
 uv, depth = model.project(pointcloud, image.shape)
 
-plt.imshow(image.astype("int64"))
+plt.imshow(image)
 plt.scatter(np.ravel(uv[0, :]), np.ravel(uv[1, :]), s=2, c=depth, edgecolors='none', cmap='jet')
 plt.xlim(0, image.shape[1])
 plt.ylim(image.shape[0], 0)

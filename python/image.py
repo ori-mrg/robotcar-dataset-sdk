@@ -15,6 +15,7 @@
 import re
 from PIL import Image
 from colour_demosaicing import demosaicing_CFA_Bayer_bilinear as demosaic
+import numpy as np
 
 BAYER_STEREO = 'gbrg'
 BAYER_MONO = 'rggb'
@@ -45,5 +46,5 @@ def load_image(image_path, model=None):
     if model:
         img = model.undistort(img)
 
-    return img
+    return np.array(img).astype(np.uint8)
 
