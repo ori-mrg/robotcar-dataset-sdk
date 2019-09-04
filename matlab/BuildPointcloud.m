@@ -33,6 +33,7 @@ function [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, extrin
 % Authors: 
 %  Geoff Pascoe (gmp@robots.ox.ac.uk)
 %  Will Maddern (wm@robots.ox.ac.uk)
+%  Dan Barnes (dbarnes@robots.ox.ac.uk)
 %
 % This work is licensed under the Creative Commons 
 % Attribution-NonCommercial-ShareAlike 4.0 International License. 
@@ -51,7 +52,8 @@ function [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, extrin
   end
   
   
-  laser = regexp(laser_dir, '(lms_front|lms_rear|ldmrs)', 'match');
+  laser = regexp(laser_dir, ...
+      '(lms_front|lms_rear|ldmrs|velodyne_left|velodyne_right)', 'match');
   laser = laser{end};
   laser_timestamps = dlmread([laser_dir '../' laser '.timestamps']);
   
@@ -107,19 +109,35 @@ function [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, extrin
   reflectance = [];
   for i=1:n
     scan_path = [laser_dir num2str(laser_timestamps(i,1)) '.bin'];
-    if ~exist(scan_path, 'file')
-      continue;
-    end
-    scan_file = fopen(scan_path);
-    scan = fread(scan_file, 'double');
-    fclose(scan_file);
-    
-    % The scan file contains repeated tuples of three values
-    scan = reshape(scan, [3 numel(scan)/3]);
-    if regexp(laser_dir, '(lms_rear|lms_front)')
-      % LMS tuples are of the form (x, y, R)
-      reflectance = [reflectance scan(3,:)];
-      scan(3,:) = zeros(1, size(scan,2));
+    if ~contains(laser, 'velodyne')
+        if ~exist(scan_path, 'file')
+          continue;
+        end
+        scan_file = fopen(scan_path);
+        scan = fread(scan_file, 'double');
+        fclose(scan_file);
+
+        % The scan file contains repeated tuples of three values
+        scan = reshape(scan, [3 numel(scan)/3]);
+        if regexp(laser_dir, '(lms_rear|lms_front)')
+          % LMS tuples are of the form (x, y, R)
+          reflectance = [reflectance scan(3,:)];
+          scan(3,:) = zeros(1, size(scan,2));
+        end
+    else
+        if exist(scan_path, 'file')
+            ptcld = LoadVelodyneBinary(laser_dir, num2str(laser_timestamps(i,1)));
+        else
+            scan_path = [laser_dir num2str(laser_timestamps(i,1)) '.png'];
+            if ~exist(scan_path, 'file')
+              continue;
+            end
+            [ranges, intensities, angles, ~] = ...
+                LoadVelodyneRaw(laser_dir, num2str(laser_timestamps(i,1)));
+            ptcld = VelodyneRawToPointcloud(ranges, intensities, angles);
+        end
+        scan = ptcld(1:3, :);
+        reflectance = [reflectance ptcld(4, :)];
     end
     
     % Transform scan to INS frame, move to the INS pose at the scan's timestamp,
@@ -135,7 +153,7 @@ function [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, extrin
   
   % If nobody is saving the result, plot the pointcloud
   if nargout == 0
-    if reflectance
+    if ~isempty(reflectance)
       % Increase contrast in reflectance values
       colours = (reflectance - min(reflectance)) / ...
           (max(reflectance) - min(reflectance));
