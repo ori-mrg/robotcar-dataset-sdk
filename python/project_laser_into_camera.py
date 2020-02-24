@@ -43,7 +43,7 @@ G_camera_vehicle = build_se3_transform(extrinsics)
 G_camera_posesource = None
 
 poses_type = re.search('(vo|ins|rtk)\.csv', args.poses_file).group(1)
-if poses_type == 'ins':
+if poses_type in ['ins', 'rtk']:
     with open(os.path.join(args.extrinsics_dir, 'ins.txt')) as extrinsics_file:
         extrinsics = next(extrinsics_file)
         G_camera_posesource = G_camera_vehicle * build_se3_transform([float(x) for x in extrinsics.split(' ')])
