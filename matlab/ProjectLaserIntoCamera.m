@@ -91,7 +91,7 @@ function ProjectLaserIntoCamera(image_dir, laser_dir, ins_file, models_dir, extr
   end
   ins_extrinsics = dlmread(extrinsics_path);
   
-  if (strfind(ins_file, 'ins.csv'))
+  if (contains(ins_file, 'ins.csv') || contains(ins_file, 'rtk.csv'))
     G_camera_ins = SE3MatrixFromComponents(camera_extrinsics) * ...
       SE3MatrixFromComponents(ins_extrinsics);
   else

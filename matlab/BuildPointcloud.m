@@ -91,9 +91,9 @@ function [pointcloud, reflectance] = BuildPointcloud(laser_dir, ins_file, extrin
   ins_extrinsics = dlmread([extrinsics_dir 'ins.txt']);
   
   % Find pose for each LIDAR scan, relative to origin
-  if (strfind(ins_file, 'ins.csv'))
+  if (contains(ins_file, 'ins.csv') || contains(ins_file, 'rtk.csv'))
     ins_poses = InterpolatePoses(ins_file, laser_timestamps(:,1)', ...
-      origin_timestamp);
+      origin_timestamp, contains(ins_file, 'rtk.csv'));
     G_ins_laser = SE3MatrixFromComponents(ins_extrinsics) \ ...
       SE3MatrixFromComponents(laser_extrinisics);
   else
