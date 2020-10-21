@@ -17,6 +17,7 @@ import os
 import re
 import matplotlib.pyplot as plt
 from datetime import datetime as dt
+from PIL import Image
 from image import load_image
 from camera_model import CameraModel
 
@@ -24,6 +25,7 @@ parser = argparse.ArgumentParser(description='Play back images from a given dire
 
 parser.add_argument('dir', type=str, help='Directory containing images.')
 parser.add_argument('--models_dir', type=str, default=None, help='(optional) Directory containing camera model. If supplied, images will be undistorted before display')
+parser.add_argument('--export_dir', type=str, default=None, help='(optional) Directory to which the images are exported (png format).')
 parser.add_argument('--scale', type=float, default=1.0, help='(optional) factor by which to scale images before display')
 
 args = parser.parse_args()
@@ -35,6 +37,13 @@ if not os.path.isfile(timestamps_path):
   timestamps_path = os.path.join(args.dir, os.pardir, os.pardir, camera + '.timestamps')
   if not os.path.isfile(timestamps_path):
       raise IOError("Could not find timestamps file")
+
+if args.export_dir:
+    try:
+        os.makedirs(args.export_dir)
+    except FileExistsError:
+        print('Export directory already exists')
+        exit(1)      
 
 model = None
 if args.models_dir:
@@ -57,6 +66,11 @@ for line in timestamps_file:
     current_chunk = chunk
 
     img = load_image(filename, model)
+    
+    if args.export_dir:
+        img_pil = Image.fromarray(img)
+        img_pil.save(os.path.join(args.export_dir, tokens[0] + '.png'))
+        
     plt.imshow(img)
     plt.xlabel(datetime)
     plt.xticks([])
