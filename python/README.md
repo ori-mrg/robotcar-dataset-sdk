@@ -1,7 +1,7 @@
 RobotCar Dataset Python Tools
 =============================
 
-This directory contains sample python code for viewing and manipulating data from the [Oxford Robotcar Dataset](http://robotcar-dataset.robots.ox.ac.uk) and [Oxford Radar Robotcar Dataset](http://ori.ox.ac.uk/datasets/radar-robotcar-dataset).
+This directory contains sample python code for viewing and manipulating data from the [Oxford Robotcar Dataset](http://robotcar-dataset.robots.ox.ac.uk) and [Oxford Radar Robotcar Dataset](https://oxford-robotics-institute.github.io/radar-robotcar-dataset/).
 
 Requirements
 ------------
