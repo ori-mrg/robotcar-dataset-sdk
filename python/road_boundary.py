@@ -13,13 +13,13 @@
 ################################################################################
 
 import numpy as np
-
-from image import load_image
-
-
-def load_road_boundary_image(path, model=None):
-    return load_image(path, model, False)
+from PIL import Image
 
 
-def load_road_boundary_mask(path, model):
-    return load_image(path, model, False)
+def load_road_boundary_image(image_path):
+    img = Image.open(image_path)
+    return np.array(img).astype(np.uint8)
+
+
+def load_road_boundary_mask(mask_path, model):
+    return load_road_boundary_image(mask_path)
