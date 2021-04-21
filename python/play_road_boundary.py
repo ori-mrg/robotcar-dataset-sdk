@@ -13,27 +13,33 @@
 ################################################################################
 
 import argparse
-from matplotlib import pyplot as plt
+import cv2
 from pathlib import Path
 from tqdm import tqdm
 
 from datetime import datetime as dt
 from road_boundary import load_road_boundary_image, load_road_boundary_mask
-from camera_model import CameraModel
+
+
+YELLOW = (255, 255, 0)
+CYAN = (0, 255, 255)
+RED = (255, 0, 0)
+
 
 parser = argparse.ArgumentParser(description='Play back images from a given directory')
 
-parser.add_argument('dir', type=str, help='Directory containing images.')
-parser.add_argument('--models_dir', type=str, default=None, help='(optional) Directory containing camera model. If supplied, images will be undistorted before display')
-parser.add_argument('--scale', type=float, default=1.0, help='(optional) factor by which to scale images before display')
-
+parser.add_argument('trial', type=str, help='Directory containing images.')
 parser.add_argument('--camera_id', type=str, default='left', choices=['left', 'right'], help='(optional) Camera ID to display')
-parser.add_argument('--masks_id', type=str, default='raw', choices=['raw', 'classified'], help='(optional) Masks type to overlay')
+parser.add_argument('--type', type=str, default='uncurated', choices=['uncurated', 'curated'], help='(optional) Curated vs uncurated')
+parser.add_argument('--masks_id', type=str, default='mask', choices=['mask', 'mask_classified'], help='(optional) Masks type to overlay')
+
+parser.add_argument('--save_video',  action='store_true', help='Flag for saving a video')
+parser.add_argument('--save_dir',  type=str, help='Where to save the images')
 
 args = parser.parse_args()
 
-image_path = Path(args.dir) / 'stereo'/ args.camera_id / 'rgb'
-mask_path = Path(args.dir) / 'stereo' / args.camera_id / args.masks_id
+image_path = Path(args.trial) / args.type / args.camera_id / 'rgb'
+mask_path = Path(args.trial) / args.type / args.camera_id / args.masks_id
 
 assert image_path.exists(), f'Image path {image_path} does not exist'
 assert mask_path.exists(), f'Mask path {mask_path} does not exist'
@@ -41,17 +47,30 @@ assert mask_path.exists(), f'Mask path {mask_path} does not exist'
 images = sorted(image_path.glob('*.png'))
 masks = sorted(mask_path.glob('*.png'))
 
-model = None
-if args.models_dir:
-    model = CameraModel(args.models_dir, args.dir)
-
-plt.figure()
+initialised = False
 for image, mask in tqdm(zip(images, masks)):
-
     image = load_road_boundary_image(str(image))
     mask = load_road_boundary_image(str(mask))
 
-    image[mask > 0] = [255, 0, 0]
+    if args.masks_id == 'mask':
+        image[mask > 0] = YELLOW
+    else:
+        image[mask == 1] = CYAN
+        image[mask == 2] = RED
 
-    plt.imshow(image)
-    plt.pause(0.01)
+    image_ = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+    cv2.imshow('Video', image_)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+    if args.save_video:
+        if not initialised:
+            framesize = (image.shape[1], image.shape[0])
+            out = cv2.VideoWriter(str(Path(args.save_dir) / 'output_video.avi'), \
+                                  cv2.VideoWriter_fourcc(*'MPEG'),
+                                  20, framesize, True)
+            initialised = True
+
+        out.write(image_)
+
+out.release()
