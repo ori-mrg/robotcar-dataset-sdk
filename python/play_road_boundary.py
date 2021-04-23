@@ -73,6 +73,8 @@ for image, mask in tqdm(zip(images, masks)):
                                   20, framesize, True)
             initialised = True
 
+            cv2.imwrite(str(Path(args.save_dir) / f'{fname}.jpg'), image_)
+
         out.write(image_)
 
 out.release()
