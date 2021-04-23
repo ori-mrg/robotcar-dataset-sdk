@@ -47,6 +47,8 @@ assert mask_path.exists(), f'Mask path {mask_path} does not exist'
 images = sorted(image_path.glob('*.png'))
 masks = sorted(mask_path.glob('*.png'))
 
+fname = f"{args.trial}_{args.camera_id}_{args.type}_{args.masks_id}"
+
 initialised = False
 for image, mask in tqdm(zip(images, masks)):
     image = load_road_boundary_image(str(image))
@@ -66,7 +68,7 @@ for image, mask in tqdm(zip(images, masks)):
     if args.save_video:
         if not initialised:
             framesize = (image.shape[1], image.shape[0])
-            out = cv2.VideoWriter(str(Path(args.save_dir) / 'output_video.avi'), \
+            out = cv2.VideoWriter(str(Path(args.save_dir) / f'{fname}.avi'), \
                                   cv2.VideoWriter_fourcc(*'MPEG'),
                                   20, framesize, True)
             initialised = True
