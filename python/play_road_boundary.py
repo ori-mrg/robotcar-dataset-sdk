@@ -16,6 +16,7 @@ import argparse
 import cv2
 from pathlib import Path
 from tqdm import tqdm
+import numpy as np
 
 from datetime import datetime as dt
 from road_boundary import load_road_boundary_image, load_road_boundary_mask
@@ -51,6 +52,9 @@ initialised = False
 for image, mask in tqdm(zip(images, masks)):
     image = load_road_boundary_image(str(image))
     mask = load_road_boundary_image(str(mask))
+
+    kernel = np.ones((5, 5), 'uint8')
+    mask = cv2.dilate(mask, kernel, iterations=1)
 
     if args.masks_id == 'mask':
         image[mask > 0] = YELLOW
