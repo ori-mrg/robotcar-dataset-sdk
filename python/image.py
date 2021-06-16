@@ -21,7 +21,7 @@ BAYER_STEREO = 'gbrg'
 BAYER_MONO = 'rggb'
 
 
-def load_image(image_path, model=None):
+def load_image(image_path, model=None, debayer=True):
     """Loads and rectifies an image from file.
 
     Args:
@@ -42,7 +42,8 @@ def load_image(image_path, model=None):
         pattern = BAYER_MONO
 
     img = Image.open(image_path)
-    img = demosaic(img, pattern)
+    if debayer:
+        img = demosaic(img, pattern)
     if model:
         img = model.undistort(img)
 
