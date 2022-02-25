@@ -74,6 +74,9 @@ def build_pointcloud(lidar_dir, poses_file, extrinsics_dir, start_time, end_time
         # sensor is VO, which is located at the main vehicle frame
         poses = interpolate_vo_poses(poses_file, timestamps, origin_time)
 
+    # this is required because timestamps array changed in interpolate_poses() function from interpolate_poses.py
+    timestamps = timestamps[1:]
+
     pointcloud = np.array([[0], [0], [0], [0]])
     if lidar == 'ldmrs':
         reflectance = None
